@@ -72,6 +72,8 @@ npm run db:push     # applies prisma/schema.prisma
 npm run db:seed     # creates demo users, categories, authors, books
 ```
 
+> `db:push` uses the `DIRECT_URL` env var (the running server does not need it — it queries via `DATABASE_URL`). For a **local Postgres**, set `DIRECT_URL` to the same value as `DATABASE_URL` in `.env.example`. For **hosted Supabase**, use the session pooler — see the `DIRECT_URL` block in `.env.example`.
+
 Seed accounts:
 
 | Role  | Email               | Password     |
@@ -143,6 +145,42 @@ Environment (`env_file: .env` is passed to the container; compose reads `DATABAS
 | Rate limits / loan duration / storage path | Optional, see `.env.docker.example`. |
 
 Optional hardening: put nginx (or any reverse proxy) in front on port 443 and forward to `127.0.0.1:3000`. The container already runs as a non-privileged user with no shell and an HTTP healthcheck on `/health`.
+
+#### Reverse proxy (Caddy on the same Docker network)
+
+If the app and a reverse proxy container share a Docker network, point the proxy at the **service hostname + the container's internal port** (not the host-mapped port):
+
+```caddyfile
+elms.swaykh.com {
+	reverse_proxy elms:3000
+}
+```
+
+- `elms` is the `container_name` in `docker-compose.yml` (compose resolves it on the shared network).
+- The upstream port is `3000` — the app listens on that *inside* the container. The `ports: "8888:3000"` host mapping is irrelevant to the proxy and can be deleted if you only want access via the proxy.
+- Give the service a stable name and join an existing network:
+  ```yaml
+  services:
+    app:
+      container_name: elms
+      networks:
+        - proxy
+        - default
+  networks:
+    proxy:
+      external: true
+      name: proxy
+  ```
+- A `502 Bad Gateway` from the proxy almost always means the upstream points at the wrong port (host-mapped port instead of the internal one) or the app isn't up yet.
+
+#### Troubleshooting (hosted Postgres + Docker)
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `P1001: Can't reach database server at db.<ref>.supabase.co:5432` | Supabase direct hosts are **IPv6-only**; Docker bridge has no IPv6 | Connect via the pooler (`aws-0-<region>.pooler.supabase.com`), which is IPv4-reachable |
+| `prepared statement "s1" already exists` during `prisma db push` | The transaction pooler (port 6543) breaks Prisma prepared statements | Use it for the app (`DATABASE_URL`), but point schema ops at the **session pooler** via `DIRECT_URL` (port 5432, no `pgbouncer` flag) |
+| `Prisma Client could not locate the Query Engine` (openssl 1.1 vs 3.0) | `prisma generate` detected the wrong OpenSSL in the build stage | `generator.client.binaryTargets` in `schema.prisma` pins `["native", "debian-openssl-3.0.x"]`, then rebuild |
+| `502` from Caddy/nginx | Proxy dials the host-mapped port instead of the container's internal port | Upstream must be `<container-name>:3000` |
 
 ---
 
