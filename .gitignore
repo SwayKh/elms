@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets
+.env
+.env.local
+.env.test
+*.env
+
+# Storage (uploaded book files / covers)
+storage/
+storage-test/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test / coverage
+coverage/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
