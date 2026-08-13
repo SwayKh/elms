@@ -1,6 +1,8 @@
 # ---------- Build stage ----------
 # Installs dependencies and generates the Prisma client.
-FROM node:20-alpine AS build
+# Debian slim (glibc), NOT Alpine: Prisma's native engines don't load on
+# musl/Alpine ("Could not parse schema engine response" + OpenSSL errors).
+FROM node:20-slim AS build
 
 WORKDIR /app
 
@@ -11,16 +13,18 @@ COPY prisma ./prisma
 RUN npm ci
 
 # ---------- Production stage ----------
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# libc6-compat: required by the Prisma engine on Alpine/musl.
-# wget: used by the HEALTHCHECK below.
-RUN apk add --no-cache libc6-compat wget
+# openssl: required by the Prisma engine.
+# (node:20-slim ships with openssl, but install explicitly to be safe.)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
 
 # Dependencies (full copy: includes the prisma CLI, used by the entrypoint
 # for `prisma db push` at startup).
@@ -36,8 +40,9 @@ RUN chmod +x ./entrypoint.sh
 
 EXPOSE 3000
 
+# Uses Node's built-in fetch (no wget/curl needed on slim).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD wget -qO- http://localhost:3000/health || exit 1
+  CMD node -e "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 # Book files / covers uploaded at runtime live here.
 VOLUME ["/app/storage"]
