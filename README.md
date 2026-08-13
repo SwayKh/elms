@@ -99,6 +99,42 @@ npm run dev
 
 It covers login/register (pre-filled seed credentials), book search/sort, borrow/renew, AI summaries, downloading files with an active loan, favorites, progress, reviews, bookmarks, and (for admin) stats, Open Library import, and author/category/book creation.
 
+### 6. Deploy with Docker (VPS)
+
+The repo ships a production `Dockerfile`, a `docker-compose.yml` (bundled PostgreSQL + app), and `docker/entrypoint.sh`:
+
+```bash
+# 1. Create .env (copy from .env.docker.example); at minimum set JWT_SECRET,
+#    and AI_API_TOKEN if you have one
+cp .env.docker.example .env
+
+# 2. Build and start (also runs `prisma db push` to apply the schema)
+docker compose up -d --build
+
+# 3. Open http://YOUR_SERVER_IP:3000
+```
+
+How it works:
+
+- The **app and API are the same process** — the frontend is static files served by Express, so no frontend to build or proxy separately. Nothing else to configure to call the API; the UI talks to it via relative URLs on the same origin.
+- `docker/entrypoint.sh` runs `prisma db push --skip-generate` on startup (retrying until the database answers), so the schema is always applied before the server boots.
+- **Uploads persist** via the `book-storage` volume mounted at `/app/storage` (`STORAGE_PATH`). Book files/covers survive container restarts.
+- **Demo accounts**: set `DB_SEED=true` in the compose file to seed `admin@elibrary.com` / `user@elibrary.com` on first boot. Leave it `false` (the default) for real deployments — those default credentials are for testing only.
+
+Environment (`env_file: .env` is passed to the container; compose overrides `DATABASE_URL` to point at the bundled Postgres):
+
+| Variable | Notes |
+| -------- | ----- |
+| `JWT_SECRET` | **Required.** Long random string (`openssl rand -base64 48`). |
+| `DATABASE_URL` | Compose points this at the bundled `db` service. To use your **own hosted Postgres** instead, set it in the compose file (or `docker-compose.override.yml`) and delete/rename the `db` service; set `PG_BOUNCER=true` + `PRISMA_CONNECTION_LIMIT=1` for a Neon/Supabase pooler. |
+| `AI_API_TOKEN` | Leave empty to use the fake AI client; set it to use the real summary API (cached, quota-safe). |
+| `AI_CLIENT` | `real` or `fake`. |
+| `PORT` | Default `3000`; change here and in the compose `ports:` mapping. |
+| `DB_SEED` | `true`/`false` (default `false`), seeds demo accounts via the entrypoint. |
+| Rate limits / loan duration / storage path | Optional, see `.env.docker.example`. |
+
+Optional hardening: put nginx (or any reverse proxy) in front on port 443 and forward to `127.0.0.1:3000`. The container already runs as a non-privileged user with no shell and an HTTP healthcheck on `/health`.
+
 ---
 
 ## Project Structure

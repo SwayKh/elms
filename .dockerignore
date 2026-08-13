@@ -1,0 +1,23 @@
+node_modules
+storage
+storage-test
+coverage
+
+# Never copy secrets into the image
+.env
+.env.test
+.env.local
+
+# Not needed in the image
+.git
+.gitignore
+tests
+scripts
+*.md
+designDoc.md
+STUDY_GUIDE.md
+
+# Build context artifacts
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
