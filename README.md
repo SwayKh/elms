@@ -101,12 +101,18 @@ It covers login/register (pre-filled seed credentials), book search/sort, borrow
 
 ### 6. Deploy with Docker (VPS)
 
-The repo ships a production `Dockerfile`, a `docker-compose.yml` (bundled PostgreSQL + app), and `docker/entrypoint.sh`:
+The repo ships a production `Dockerfile`, a `docker-compose.yml`, and `docker/entrypoint.sh`. The compose file runs **only the app** — the database is your **hosted Postgres** (Neon, Supabase, Render, etc.), not a container:
 
 ```bash
-# 1. Create .env (copy from .env.docker.example); at minimum set JWT_SECRET,
-#    and AI_API_TOKEN if you have one
+# 1. Create .env from the template and set the required values
 cp .env.docker.example .env
+
+#    Required: DATABASE_URL (hosted postgresql:// URL) and JWT_SECRET.
+#    Optional: AI_API_TOKEN if you have one.
+#    For Neon/Supabase use the POOLER/transaction endpoint and
+#    PG_BOUNCER=true (the template defaults this to true).
+#    e.g. DATABASE_URL=postgresql://user:pass@ep-xxx.aws.neon.tech/dbname?sslmode=require
+nano .env
 
 # 2. Build and start (also runs `prisma db push` to apply the schema)
 docker compose up -d --build
@@ -117,16 +123,18 @@ docker compose up -d --build
 How it works:
 
 - The **app and API are the same process** — the frontend is static files served by Express, so no frontend to build or proxy separately. Nothing else to configure to call the API; the UI talks to it via relative URLs on the same origin.
-- `docker/entrypoint.sh` runs `prisma db push --skip-generate` on startup (retrying until the database answers), so the schema is always applied before the server boots.
+- `docker/entrypoint.sh` runs `prisma db push --skip-generate` on startup (retrying until the hosted database answers), so the schema is applied to your hosted Postgres automatically before the server boots.
 - **Uploads persist** via the `book-storage` volume mounted at `/app/storage` (`STORAGE_PATH`). Book files/covers survive container restarts.
 - **Demo accounts**: set `DB_SEED=true` in the compose file to seed `admin@elibrary.com` / `user@elibrary.com` on first boot. Leave it `false` (the default) for real deployments — those default credentials are for testing only.
 
-Environment (`env_file: .env` is passed to the container; compose overrides `DATABASE_URL` to point at the bundled Postgres):
+Environment (`env_file: .env` is passed to the container; compose reads `DATABASE_URL` and `JWT_SECRET` from it too):
 
 | Variable | Notes |
 | -------- | ----- |
+| `DATABASE_URL` | **Required.** Your hosted Postgres connection string (pooler endpoint for Neon/Supabase; keep scheme `postgresql://` and add `sslmode=require`). |
 | `JWT_SECRET` | **Required.** Long random string (`openssl rand -base64 48`). |
-| `DATABASE_URL` | Compose points this at the bundled `db` service. To use your **own hosted Postgres** instead, set it in the compose file (or `docker-compose.override.yml`) and delete/rename the `db` service; set `PG_BOUNCER=true` + `PRISMA_CONNECTION_LIMIT=1` for a Neon/Supabase pooler. |
+| `PG_BOUNCER` | `true` when connecting through a Neon/Supabase pooler (template default), `false` for a direct/dedicated connection. |
+| `PRISMA_CONNECTION_LIMIT` | `1` (default) — keep low for hosted providers. |
 | `AI_API_TOKEN` | Leave empty to use the fake AI client; set it to use the real summary API (cached, quota-safe). |
 | `AI_CLIENT` | `real` or `fake`. |
 | `PORT` | Default `3000`; change here and in the compose `ports:` mapping. |

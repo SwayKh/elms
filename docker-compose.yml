@@ -1,28 +1,13 @@
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: elibrary
-      POSTGRES_PASSWORD: elibrary
-      POSTGRES_DB: e_library
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U elibrary -d e_library"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   app:
     build: .
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      # Overrides whatever DATABASE_URL is in .env so the app talks to the
-      # `db` service above (which is reachable at hostname `db`).
-      DATABASE_URL: postgresql://elibrary:elibrary@db:5432/e_library?schema=public
+      # Your hosted Postgres connection string, read from .env (required).
+      # Use the pooler/transaction endpoint for Neon/Supabase.
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL in your .env file (hosted postgresql:// URL)}
       # Fails fast at `docker compose up` if JWT_SECRET isn't in .env.
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in your .env file}
       PORT: 3000
@@ -30,14 +15,11 @@ services:
       # Only enable for testing — it ships default credentials.
       DB_SEED: "false"
     env_file:
-      # Injects the rest of your config (AI_API_TOKEN, rate limits, etc.).
+      # Injects the rest of your config (AI_API_TOKEN, PG_BOUNCER,
+      # PRISMA_CONNECTION_LIMIT, rate limits, etc.).
       - .env
-    depends_on:
-      db:
-        condition: service_healthy
     volumes:
       - book-storage:/app/storage
 
 volumes:
-  pgdata:
   book-storage:
