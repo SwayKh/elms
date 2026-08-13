@@ -132,6 +132,7 @@ Environment (`env_file: .env` is passed to the container; compose reads `DATABAS
 | Variable | Notes |
 | -------- | ----- |
 | `DATABASE_URL` | **Required.** Your hosted Postgres connection string (pooler endpoint for Neon/Supabase; keep scheme `postgresql://` and add `sslmode=require`). |
+| `DIRECT_URL` | For schema operations (`prisma db push`). On Supabase, set this to the **session** pooler (port `5432`, no `pgbouncer` flag) — the direct host is IPv6-only and unreachable from Docker; the transaction pooler breaks prepared statements. |
 | `JWT_SECRET` | **Required.** Long random string (`openssl rand -base64 48`). |
 | `PG_BOUNCER` | `true` when connecting through a Neon/Supabase pooler (template default), `false` for a direct/dedicated connection. |
 | `PRISMA_CONNECTION_LIMIT` | `1` (default) — keep low for hosted providers. |
