@@ -1,0 +1,219 @@
+:root {
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --border: #dde3e9;
+  --text: #1f2933;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --danger: #dc2626;
+  --ok: #16a34a;
+  --warn: #b45309;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 24px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar h1 { margin: 0; font-size: 20px; }
+
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  background: var(--muted);
+}
+.dot.ok { background: var(--ok); }
+.dot.bad { background: var(--danger); }
+
+#userBox { display: flex; align-items: center; gap: 10px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 16px 24px;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+
+@media (max-width: 800px) {
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+}
+
+.col { display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--muted); }
+
+input, select, textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  background: #fff;
+}
+
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+
+.btn {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text);
+}
+.btn:hover { border-color: var(--primary); color: var(--primary); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn.primary:hover { background: var(--primary-dark); color: #fff; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn.link { border: none; background: none; color: var(--primary); padding: 2px 0; text-decoration: underline; cursor: pointer; }
+
+.hint { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 6px; }
+
+.msg { min-height: 20px; font-size: 14px; margin: 8px 0 0; }
+.msg.error { color: var(--danger); }
+.msg.ok { color: var(--ok); }
+.msg.warn { color: var(--warn); }
+
+.books { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 14px; }
+
+.book {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fbfcfe;
+}
+
+.book-head { display: flex; gap: 12px; align-items: flex-start; }
+
+.book-cover {
+  width: 64px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: #eef1f5;
+  flex-shrink: 0;
+}
+.book-cover.placeholder { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; text-align: center; }
+
+.book-title { margin: 0; font-size: 16px; }
+.book-meta { font-size: 13px; color: var(--muted); }
+.book-meta strong { color: var(--text); }
+.book-meta.loan { color: var(--ok); font-weight: 600; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 12px; background: #e8eefc; color: var(--primary-dark); padding: 2px 8px; border-radius: 999px; }
+.tag.gray { background: #eef1f5; color: var(--muted); }
+.tag.green { background: #e7f6ec; color: var(--ok); }
+.tag.red { background: #fdeaea; color: var(--danger); }
+
+.book-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+
+.btn.danger { color: var(--danger); }
+.btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+.card-tools {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+.card-tools summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  user-select: none;
+}
+.card-tools summary:hover { color: var(--primary); }
+.card-tools[open] summary { margin-bottom: 8px; color: var(--text); }
+
+.tools-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+
+.tool {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.tool-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  width: 100%;
+}
+.tool input[type="number"], .tool input[type="text"] { flex: 1; min-width: 90px; }
+.tool .file-input { flex: 1; min-width: 140px; font-size: 12px; }
+
+.card-msg { font-size: 13px; line-height: 1.45; }
+.card-msg:not(:empty) { margin-top: 8px; }
+.card-msg.ok { color: var(--ok); }
+.card-msg.warn { color: var(--warn); }
+.card-msg.error { color: var(--danger); }
+
+details summary { cursor: pointer; font-weight: 600; margin-bottom: 10px; }
+
+.admin-out { margin-top: 12px; }
+.admin-out pre { background: #0f172a; color: #dbeafe; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+.admin-row { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+
+.summary-box {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  background: #f8fafc;
+  font-size: 13px;
+}
+.summary-box strong { color: var(--primary-dark); }
+.summary-box div { margin-top: 4px; white-space: pre-wrap; }
+
+.bookmark-box {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warn);
+  border-radius: 6px;
+  background: #fffbeb;
+  font-size: 13px;
+}
+.bookmark-box strong { color: var(--warn); }
+.bookmark-box ul { margin: 6px 0 0; padding-left: 18px; }
+.bookmark-box div { margin-top: 4px; color: var(--muted); }

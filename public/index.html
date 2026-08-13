@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Library — Test Client</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>E-Library Test Client</h1>
+    <div class="topbar-right">
+      <span id="conn"><span id="healthDot" class="dot"></span><span id="healthText">checking /health…</span></span>
+      <span id="userBox" hidden>
+        <strong id="userLabel"></strong>
+        <button id="logoutBtn" class="btn small" type="button">Logout</button>
+      </span>
+    </div>
+  </header>
+
+  <section id="authSection" class="card">
+    <div class="grid2">
+      <form id="loginForm" class="col">
+        <h2>Login</h2>
+        <label>Email <input id="loginEmail" type="email" required /></label>
+        <label>Password <input id="loginPassword" type="password" required /></label>
+        <button class="btn primary" type="submit">Login</button>
+        <div class="hint">
+          <button type="button" class="link" data-fill="admin">Use admin: admin@elibrary.com / admin123456</button>
+          <button type="button" class="link" data-fill="user">Use user: user@elibrary.com / user123456</button>
+        </div>
+      </form>
+      <form id="registerForm" class="col">
+        <h2>Register</h2>
+        <label>Name <input id="regName" type="text" required /></label>
+        <label>Email <input id="regEmail" type="email" required /></label>
+        <label>Password (min 8) <input id="regPassword" type="password" minlength="8" required /></label>
+        <button class="btn primary" type="submit">Register</button>
+      </form>
+    </div>
+    <p id="authMsg" class="msg"></p>
+  </section>
+
+  <section id="appSection" hidden>
+    <div class="card">
+      <div class="row">
+        <input id="search" type="text" placeholder="search title / author / isbn…" />
+        <select id="sort">
+          <option value="recent">Newest</option>
+          <option value="title">Title A–Z</option>
+          <option value="oldest">Oldest</option>
+          <option value="mostBorrowed">Most borrowed</option>
+          <option value="mostFavorited">Most favorited</option>
+          <option value="mostReviewed">Most reviewed</option>
+        </select>
+        <button id="searchBtn" class="btn primary" type="button">Search</button>
+        <button id="myFavoritesBtn" class="btn" type="button">My favorites</button>
+      </div>
+      <p id="bookMsg" class="msg"></p>
+      <div id="books" class="books"></div>
+    </div>
+
+    <div class="card" id="adminCard" hidden>
+      <h2>Admin tools</h2>
+      <div class="row">
+        <button id="statsBtn" class="btn" type="button">Stats</button>
+        <button id="olSearchBtn" class="btn" type="button">Open Library search</button>
+      </div>
+      <div id="adminOut" class="admin-out"></div>
+      <details>
+        <summary>Create author / category / book</summary>
+        <div class="grid3">
+          <form id="authorForm" class="col">
+            <h3>Author</h3>
+            <label>Name <input name="name" required /></label>
+            <label>Bio <textarea name="biography" rows="3"></textarea></label>
+            <button class="btn" type="submit">Create</button>
+          </form>
+          <form id="categoryForm" class="col">
+            <h3>Category</h3>
+            <label>Name <input name="name" required /></label>
+            <label>Description <textarea name="description" rows="3"></textarea></label>
+            <button class="btn" type="submit">Create</button>
+          </form>
+          <form id="bookForm" class="col">
+            <h3>Book</h3>
+            <label>Title <input name="title" required /></label>
+            <label>ISBN <input name="isbn" /></label>
+            <label>Language <input name="language" /></label>
+            <label>Publisher <input name="publisher" /></label>
+            <label>Publication date <input name="publicationDate" type="date" /></label>
+            <label>Description <textarea name="description" rows="3"></textarea></label>
+            <label>Author IDs (comma-separated) <input name="authorIds" /></label>
+            <label>Category IDs (comma-separated) <input name="categoryIds" /></label>
+            <button class="btn" type="submit">Create</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <script src="/app.js"></script>
+</body>
+</html>
